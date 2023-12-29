@@ -61,6 +61,20 @@ class TeamLeader: SaleManagerDelegate {
     }
 }
 
+class HeadOfTheDesk: SaleManagerDelegate {
+    var sale: SaleManager?
+    
+    func crmBaseIsEmpty() {
+        print("Alright, i will do that, cuz team leader is absent.")
+        sale?.addNewLeads(amount: 200)
+    }
+    
+    func newHaventPickedUpPhone() {
+        print("So what ? call it again.. it's your money.. And mine too!")
+        sale?.callAgain()
+    }
+}
+
 var saleVova = SaleManager(name: "Vova Berezuk")
 var teamLeaderPrada = TeamLeader()
 teamLeaderPrada.saleAgent = saleVova
@@ -73,3 +87,11 @@ saleVova.leadsCountDecrease() // у меня стало 0 лидов и я об�
 saleVova.callNewWithNoAnswerStatus() // статус = "No answer" -> передал инфу делегату
 // It's okay, try to call him one more time
 // Calling again..
+print("_____________")
+// creating new salesDelegate = Head of the Desk
+var headOfTheDesk = HeadOfTheDesk()
+headOfTheDesk.sale = saleVova
+saleVova.delegate = headOfTheDesk
+print(saleVova.crmLeadsCount) // 40
+saleVova.crmLeadsCount = 0    // 0
+print(saleVova.crmLeadsCount) // Alright, i will do that, cuz team leader is absent. + 200
