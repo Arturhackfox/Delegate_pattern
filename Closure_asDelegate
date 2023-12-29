@@ -1,0 +1,34 @@
+// closure вместо delegate
+
+class ViewController1 {
+    var payViews: [PayView1]
+    
+    init(payViews: [PayView1]) {
+        self.payViews = payViews
+        
+        for view in payViews {
+            view.didPressButton = { price in
+                print("Price of item - \(price)")
+            }
+        }
+    }
+}
+
+class PayView1 {
+    var price: Double = 0.0
+    var didPressButton: ((Double) -> ())?
+    
+    func buy(){
+        didPressButton?(price)
+    }
+}
+
+var notebook = PayView1()
+notebook.price = 777
+var table = PayView1()
+table.price = 333
+
+var Vc = ViewController1(payViews: [notebook, table])
+
+Vc.payViews[0].buy()
+Vc.payViews[1].buy()
