@@ -1,0 +1,46 @@
+// example One to Many
+
+
+protocol PayViewDelegate: AnyObject {
+    func didPay(_ who: PayView)
+}
+
+class PayView {
+    var price: Int = 0
+    weak var delegate: PayViewDelegate? {
+        didSet {
+            print("Delegate successfuly set to \(delegate).")
+        }
+    }
+    
+    func pay() {
+        delegate?.didPay(self)
+    }
+}
+
+class ViewController {
+    var payView: [PayView?]
+    
+    init(payView: [PayView?]) {
+        self.payView = payView
+        payView.forEach { $0?.delegate = self }
+    }
+}
+
+extension ViewController: PayViewDelegate {
+    func didPay(_ who: PayView) {
+        print("Thanks for your purchase! Price is - \(who.price)")
+    }
+}
+
+var laptop = PayView()
+laptop.price = 2799
+var headset = PayView()
+headset.price = 240
+var phone = PayView()
+phone.price = 1200
+var viewController = ViewController(payView: [laptop, headset, phone])
+
+laptop.pay()        // Thanks for your purchase! Price is - 2799
+headset.pay()       // Thanks for your purchase! Price is - 240
+phone.pay()         // Thanks for your purchase! Price is - 1200
