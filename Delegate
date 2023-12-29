@@ -1,0 +1,75 @@
+// Example - 3
+// Delegate protocol - Проще говоря это объект к которому он в теории может обратиться.
+
+protocol SaleManagerDelegate: AnyObject {
+    func crmBaseIsEmpty()
+    func newHaventPickedUpPhone()
+}
+
+class SaleManager {
+    var name: String
+    var crmLeadsCount: Int = 2 {
+        didSet {
+            if crmLeadsCount == 0 {
+                delegate?.crmBaseIsEmpty()
+            }
+        }
+    }
+    var leadStatus: String? {
+        didSet {
+            if leadStatus == "No answer" {
+                delegate?.newHaventPickedUpPhone()
+            }
+        }
+    }
+    
+    weak var delegate: SaleManagerDelegate?
+    
+    init(name: String, delegate: SaleManagerDelegate? = nil) {
+        self.name = name
+        self.delegate = delegate
+    }
+    
+    func leadsCountDecrease() {
+        crmLeadsCount -= 1
+    }
+    
+    func callNewWithNoAnswerStatus() {
+      leadStatus = "No answer"
+    }
+    
+    func addNewLeads(amount: Int) {
+        crmLeadsCount += amount
+    }
+    
+    func callAgain() {
+        print("Calling again..")
+    }
+}
+
+class TeamLeader: SaleManagerDelegate {
+    var saleAgent: SaleManager?
+    
+    func crmBaseIsEmpty() {
+        print("i see..")
+        saleAgent?.addNewLeads(amount: 40)
+        print("I assigned new leads to you.")
+    }
+    func newHaventPickedUpPhone() {
+        print("It's okay, try to call him one more time")
+        saleAgent?.callAgain()
+    }
+}
+
+var saleVova = SaleManager(name: "Vova Berezuk")
+var teamLeaderPrada = TeamLeader()
+teamLeaderPrada.saleAgent = saleVova
+saleVova.delegate = teamLeaderPrada
+
+saleVova.leadsCountDecrease()
+saleVova.leadsCountDecrease() // у меня стало 0 лидов и я обратился с этой инфой к делегату
+// i see..
+// I assigned new leads to you.
+saleVova.callNewWithNoAnswerStatus() // статус = "No answer" -> передал инфу делегату
+// It's okay, try to call him one more time
+// Calling again..
