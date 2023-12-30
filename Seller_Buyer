@@ -1,0 +1,88 @@
+// 1. protocol
+// 2. object - A , weak var delegate: ProtocolDelegate? frind it with b
+// 3. object - B as Delegate: DelegateProtocol { realization } friend it with a
+
+protocol BuyerDelegate: AnyObject {
+    func didBuy(item: Items)
+    func didCheckPrice(forItem: Items)
+    func refusedBuying(item: Items)
+    func didBuyWithDiscount(item: Items)
+}
+
+enum Items: Int {
+    case cola = 2, powder = 5, snacks = 3, milk = 10
+}
+
+class Buyer {
+    weak var delegate: BuyerDelegate?
+    private var selectedItem: Items = .cola
+
+    
+    func chooseAndBuy(item: Items) {
+        selectedItem = item
+        delegate?.didBuy(item: selectedItem)
+    }
+    
+    func buyWithDiscount(item: Items) {
+        delegate?.didBuyWithDiscount(item: item)
+    }
+    
+    func refuseBuying(item: Items) {
+        print("Nah, i don't have enought money")
+        delegate?.refusedBuying(item: item)
+    }
+    
+    func checkPrice(for item: Items)  {
+        switch item {
+        case .cola: delegate?.didCheckPrice(forItem: .cola)
+        case .milk: delegate?.didCheckPrice(forItem: .milk)
+        case .powder: delegate?.didCheckPrice(forItem: .powder)
+        case .snacks: delegate?.didCheckPrice(forItem: .snacks)
+        }
+    }
+}
+
+class SellerCashier {
+    var buyer: Buyer?
+    private(set) var purchases = [Items]()
+    private(set) var currentDiscountedPrice = 0.0
+    init(buyer: Buyer) {
+        self.buyer = buyer
+        buyer.delegate = self
+    }
+}
+
+extension SellerCashier: BuyerDelegate {
+    func didBuy(item: Items) {
+        let purchase = item
+        purchases.append(purchase)
+        print("You've made pruchase, \(purchase) has been added to your purchases.")
+    }
+    
+    func didBuyWithDiscount(item: Items) {
+        let purchase = item
+        purchases.append(purchase)
+        print("You've made greate purchase with discount 30% off for only - \(currentDiscountedPrice)$")
+    }
+    
+    func didCheckPrice(forItem: Items) {
+        print("\(forItem) price is - \(forItem.rawValue)$")
+        print("So what, will you buy it ?")
+    }
+    
+    func refusedBuying(item: Items) {
+        let initialPrice = Double(item.rawValue)
+        let discontedPrice = initialPrice - (initialPrice * (30.0 / 100.0))
+        print("I can make speacial offer for you - from \(item.rawValue)$ to - \(discontedPrice)$")
+        currentDiscountedPrice = discontedPrice
+    }
+}
+
+var buyer = Buyer()
+var seller = SellerCashier(buyer: buyer)
+
+buyer.checkPrice(for: .cola)
+buyer.chooseAndBuy(item: .cola)
+buyer.checkPrice(for: .milk)
+buyer.refuseBuying(item: .milk)
+buyer.buyWithDiscount(item: .milk)
